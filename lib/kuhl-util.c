@@ -31,13 +31,6 @@
 
 #include "kuhl-nodep.h"
 
-// When compiling on windows, add suseconds_t and the rand48 functions.
-#ifdef __MINGW32__
-#include <windows.h>
-
-typedef long suseconds_t;
-#endif
-
 #ifdef KUHL_UTIL_USE_ASSIMP
 #include <assimp/cimport.h>
 #include <assimp/scene.h>

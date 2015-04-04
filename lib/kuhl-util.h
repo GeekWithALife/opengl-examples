@@ -178,9 +178,11 @@ void kuhl_geometry_texture(kuhl_geometry *geom, GLuint texture, const char* name
 
 
 void kuhl_flip_texture_rgba_array(unsigned char *image, const int width, const int height, const int components);
+GLuint kuhl_read_texture_rgba_array_wrap(const unsigned char *array, int width, int height, GLuint wrapS, GLuint wrapT);
 GLuint kuhl_read_texture_rgba_array(const unsigned char *array, int width, int height);
 
 float kuhl_make_label(const char *label, GLuint *texName, float color[3], float bgcolor[4], float pointsize);
+float kuhl_read_texture_file_wrap(const char *filename, GLuint *texName, GLuint wrapS, GLuint wrapT);
 float kuhl_read_texture_file(const char *filename, GLuint *texName);
 void kuhl_screenshot(const char *outputImageFilename);
 void kuhl_video_record(const char *fileLabel, int fps);

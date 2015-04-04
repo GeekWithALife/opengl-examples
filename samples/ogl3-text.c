@@ -18,6 +18,8 @@ GLuint program = 0; // id value for the GLSL program
 GLuint program_font = 0; // id value for the GLSL program
 
 kuhl_geometry triangle;
+font_info text;
+
 unsigned bufferLen = 8;
 char buffer[1024] = "Edit me!";
 
@@ -59,6 +61,17 @@ void display()
 	/* If we are using DGR, send or receive data to keep multiple
 	 * processes/computers synchronized. */
 	dgr_update();
+
+	/* Get current frames per second calculations. */
+	float fps = kuhl_getfps(&fps_state);
+	
+	char label[1024] = "FPS: -0.0";
+	if(dgr_is_enabled() == 0 || dgr_is_master())
+	{
+		// Check if FPS value was just updated by kuhl_getfps()
+		if(fps_state.frame == 0)
+			snprintf(label, 1024, "FPS: %0.1f", fps);
+	}
 	
 	int width = 4;
 	int height = 4;
@@ -140,21 +153,20 @@ void display()
 		kuhl_geometry_draw(&triangle);
 		
 		glUseProgram(program_font);
-		float textColor[4] = {1, 0, 0, 1};
-		glUniform4fv(kuhl_get_uniform("color"), 1, textColor);
-		glDisable(GL_DEPTH_TEST); // turn on depth testing
+		glDisable(GL_DEPTH_TEST); // turn off depth testing
 		kuhl_errorcheck();
 		
 		float x = 10, y = 10;
-		kuhl_font_draw(buffer, x, y, width, height);
+		font_draw(&text, buffer, x, y);
 		kuhl_errorcheck();
 		
-		char label[1024];
-		float fps = kuhl_getfps(&fps_state);
-		snprintf(label, 1024, "FPS: %0.1f", fps);
-		y = glutGet(GLUT_WINDOW_HEIGHT) - 36 * 2;
-		kuhl_font_draw(label, x, y, width, height);
-		kuhl_errorcheck();
+		// Draw fps
+		if(dgr_is_enabled() == 0 || dgr_is_master())
+		{
+			y = glutGet(GLUT_WINDOW_HEIGHT) - 36 * 2;
+			font_draw(&text, label, x, y);
+			kuhl_errorcheck();
+		}
 		
 		glEnable(GL_DEPTH_TEST); // turn on depth testing
 		kuhl_errorcheck();
@@ -242,27 +254,37 @@ int main(int argc, char** argv)
 
 	init_geometryTriangle(&triangle, program);
 	
+	char* fontPath = "./cour.ttf";
+	if (argc > 1)
+		fontPath = argv[1];
+	
+	if (!font_init()) {
+		fprintf(stderr, "Failed to initialize freetype!\n");
+		exit(1);
+	}
+	
+	// Create text shader
 	program_font = kuhl_create_program("ogl3-text.vert", "ogl3-text.frag");
 	glUseProgram(program_font);
 	kuhl_errorcheck();
+
+	// Set text color.
+	float color[4] = {1, 0, 0, 1};
+	glUniform4fv(kuhl_get_uniform("color"), 1, color);
 	
-	char* fontPath = "cour.ttf";
-	if (argc > 1)
-		fontPath = argv[1];
-	printf("Initializing fonts...\n");
-	if (kuhl_font_init(program_font)) {
-		printf("Loading face %s\n", fontPath);
-		FT_Face myFace;
-		if (kuhl_font_load(fontPath, &myFace))
-			kuhl_font_set(&myFace, 36);
-		else
-			exit(0);
+	// Load font.
+	if (!font_info_new(&text, program_font, fontPath, 36, 2)) {
+		fprintf(stderr, "Failed to initialize font %s!\n", fontPath);
+		exit(1);
 	}
+	
 	/* Good practice: Unbind objects until we really need them. */
 	glUseProgram(0);
 
 	dgr_init();     /* Initialize DGR based on environment variables. */
 	projmat_init(); /* Figure out which projection matrix we should use based on environment variables */
+	
+	kuhl_getfps_init(&fps_state);
 
 	float initCamPos[3]  = {0,0,10}; // location of camera
 	float initCamLook[3] = {0,0,0}; // a point the camera is facing at
@@ -277,8 +299,10 @@ int main(int argc, char** argv)
        glutMainLoopEvent();
     */
 	
+	font_info_release(&text);
+	
 	// Release fonts.
-	kuhl_font_release();
+	font_release();
 
 	exit(EXIT_SUCCESS);
 }

@@ -1,5 +1,5 @@
-#ifndef __KUHL_FONT_H__
-#define __KUHL_FONT_H__
+#ifndef __FONT_HELPER_H__
+#define __FONT_HELPER_H__
 
 #include <GL/glew.h>
 #ifdef __APPLE__
@@ -7,8 +7,6 @@
 #else
 #include <GL/freeglut.h>
 #endif
-
-#include "kuhl-util.h"
 
 // Freetype
 #ifdef KUHL_UTIL_USE_FREETYPE

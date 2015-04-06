@@ -1,4 +1,5 @@
 #include "font-helper.h"
+#include "kuhl-util.h"
 
 #define min(x, y) (x < y) ? x : y
 #define max(x, y) (x > y) ? x : y
@@ -7,14 +8,19 @@
 static FT_Library lib;
 
 static int font_load(FT_Face* face, const char* fileName, const unsigned int pointSize) {
-	if (fileName == NULL || pointSize < 1) {
+	char *newFilename = kuhl_find_file(fileName);
+	if (newFilename == NULL || pointSize < 1) {
 		fprintf(stderr, "Font: Could not open font - either a NULL file path, or invalid point size\n");
+		free(newFilename);
 		return 0;
 	}
-	if(FT_New_Face(lib, fileName, 0, face)) {
+	if(FT_New_Face(lib, newFilename, 0, face)) {
 		fprintf(stderr, "Font: Could not open font '%s'\n", fileName);
+		free(newFilename);
 		return 0;
 	}
+	free(newFilename);
+	
 	if(FT_Set_Pixel_Sizes(*face, 0, pointSize)) {
 		fprintf(stderr, "Font: Could not resize font '%s'\n", (*face)->family_name);
 		return 0;
@@ -170,9 +176,6 @@ static void render_char(font_info* info, const char ch, float* x, float* y, floa
 	float y2 = -*y - g->bitmap_top * sy;
 	float w = g->bitmap.width * sx;
 	float h = g->bitmap.rows * sy;
-	
-	int advanceW = (g->advance.x >> 6);
-	x2 += ((info->pointSize - advanceW)/2.0) * sx;
 	
 	GLfloat box[4][4] = {
 		{x2,     -y2    , 0, 0},

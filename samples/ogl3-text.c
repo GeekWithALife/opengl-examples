@@ -65,16 +65,6 @@ void display()
 	/* Get current frames per second calculations. */
 	float fps = kuhl_getfps(&fps_state);
 	
-	char label[1024] = "FPS: -0.0";
-	if(dgr_is_enabled() == 0 || dgr_is_master())
-	{
-		// Check if FPS value was just updated by kuhl_getfps()
-		if(fps_state.frame == 0)
-			snprintf(label, 1024, "FPS: %0.1f", fps);
-	}
-	
-	int width = 4;
-	int height = 4;
 	/* Render the scene once for each viewport. Frequently one
 	 * viewport will fill the entire screen. However, this loop will
 	 * run twice for HMDs (once for the left eye and once for the
@@ -164,6 +154,9 @@ void display()
 		if(dgr_is_enabled() == 0 || dgr_is_master())
 		{
 			y = glutGet(GLUT_WINDOW_HEIGHT) - 36 * 2;
+			char label[1024] = "FPS: -0.0";
+			// Check if FPS value was just updated by kuhl_getfps()
+			snprintf(label, 1024, "FPS: %0.1f", fps);
 			font_draw(&text, label, x, y);
 			kuhl_errorcheck();
 		}
@@ -254,7 +247,7 @@ int main(int argc, char** argv)
 
 	init_geometryTriangle(&triangle, program);
 	
-	char* fontPath = "./cour.ttf";
+	char* fontPath = "../fonts/DroidSansMono.ttf";
 	if (argc > 1)
 		fontPath = argv[1];
 	

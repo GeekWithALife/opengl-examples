@@ -1627,7 +1627,8 @@ static float kuhl_read_texture_file_im(const char *filename, GLuint *texName, GL
 	int height = (int)iioinfo.height;
 	float aspectRatio = (float)width/height;
     printf("%s: Finished reading, dimensions are %dx%d\n", filename, width, height);
-	*texName = kuhl_read_texture_rgba_array(image, width, height, wrapS, wrapT);
+	
+	*texName = kuhl_read_texture_rgba_array_wrap(image, width, height, wrapS, wrapT);
 
 	if(iioinfo.comment)
 		free(iioinfo.comment);
@@ -1730,7 +1731,7 @@ float kuhl_read_texture_file_wrap(const char *filename, GLuint *texName, GLuint 
  */
 float kuhl_read_texture_file(const char *filename, GLuint *texName)
 {
-	kuhl_read_texture_file_wrap(filename, texName, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	return kuhl_read_texture_file_wrap(filename, texName, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
 #ifdef KUHL_UTIL_USE_IMAGEMAGICK

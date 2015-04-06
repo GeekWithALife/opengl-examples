@@ -153,7 +153,7 @@ void kuhl_delete_program(GLuint program);
 void kuhl_print_program_log(GLuint program);
 void kuhl_print_program_info(GLuint program);
 GLint kuhl_get_uniform(const char *uniformName);
-
+GLint kuhl_get_attribute(GLuint program, const char *attributeName);
 
 
 
